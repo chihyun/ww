@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>訂購成功</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="contanier mt-5">
+        <div class="jumbotron">
+            <h1 class="text-center">點餐成功</h1>
+            <p>您訂購了</p>
+            <p id="showmsg" class="text-center"></p>
+            <p>餐點製作中.......請稍後</p>
+            <hr>
+            <p class="text-center">便當店 tel:06-XXXXXXX</p>
+            <div class="col-sm-4 offset-sm-4">
+                 <button class="btn btn-primary btn-block" onclick="this.onclick=function(){window.location='pandon.html'}">點餐</button>
+            </div>
+           
+        </div>
+    </div>
+    <script>
+        var url=location.href;
+        var gets=url.split("?");
+        var get=gets[1].split("&");
+        var msg="";
+        var total=0;
+        for(var i=0;i<get.length-1;i=i+3){
+            var val;
+            switch (get[i]) {
+                case 'A':
+                    val='雞腿飯';
+                    break;
+                case 'B':
+                    val='雞排飯';
+                    break;
+                case 'C':
+                    val='排骨飯';
+                    break;
+                case 'D':
+                    val='招牌飯';
+                    break;
+            
+                default:
+                    break;
+            }
+            total+=get[i+1]*get[i+2];
+            msg+=val+get[i+2]+'元'+'：'+get[i+1]+'個<br>';
+            if(i==get.length-4){
+                msg+="總計："+total+"元";
+            }
+        }
+        var showmsg=document.getElementById('showmsg');
+        showmsg.innerHTML=msg;
+    </script>
+</body>
+</html>

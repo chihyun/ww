@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>便當系統</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <!-- 表單驗證 -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.1/dist/jquery.validate.min.js"></script>
+    <script>
+        function D(){
+            let aid=document.getElementById('typ1');
+            let bid=document.getElementById('typ2');
+            let cid=document.getElementById('typ3');
+            let did=document.getElementById('typ4');
+            let total=typ1.value+typ2.value+typ3.value+typ4.value;
+            if(total==0){
+                alert("請填入正確數量");
+                return false;
+            }else{
+                var msg=false;
+                if(confirm("確認訂購")){
+                    msg=true;
+                };
+                return msg;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1 class="text-center mt-5">便當店</h1>
+    <div class="container">
+        <form id="myForm" target="return" onsubmit="return D(this);" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSfhI74hx4-6eh5AsxQjUvYoZpUSKXUfLUWo_Kcc47LrB-LG3g/formResponse">
+            <div class="row">
+                <!--桌號-->
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="table">桌號<span class="text-danger">*</span></label>
+                        <select name="entry.65282911" id="table" class="form-control">
+                                <!-- js設桌號-->
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <!--雞腿飯-90元-->
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="typ1">雞腿飯-90元<span class="text-danger">(請填數量)</span></label>
+                        <input type="number" name="entry.1489714588" id="typ1" class="form-control" value="0" min=0>
+                    </div>
+                </div>
+                <!--雞排飯-80元-->
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="typ2">雞排飯-80元<span class="text-danger">(請填數量)</span></label>
+                        <input type="number" name="entry.197815193" id="typ2" class="form-control" value="0" min=0>
+                    </div>
+                </div>
+                <!--排骨飯-70元-->
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="typ3"">排骨飯-70元<span class="text-danger">(請填數量)</span></label>
+                        <input type="number" name="entry.1788047780" id="typ3" class="form-control" value="0" min=0>
+                    </div>
+                </div>
+                <!--招牌飯-60元-->
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="typ4">招牌飯-60元<span class="text-danger">(請填數量)</span></label>
+                        <input type="number" name="entry.1040062740" id="typ4" class="form-control" value="0" min=0>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <!--桌號-->
+               <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="ps">備註</label>
+                        <textarea name="entry.406563214" id="ps" class="form-control" rows="4"></textarea>
+                    </div>
+               </div> 
+            </div>
+            <div class="text-center pb-5">
+                <button type="submit" class="btn btn-primary">送出</button>
+                <!--表單返回頁-->
+                <iframe name="return" style="display: none;" onload="this.onload= function X(){
+                    let aid=document.getElementById('typ1');
+                    let bid=document.getElementById('typ2');
+                    let cid=document.getElementById('typ3');
+                    let did=document.getElementById('typ4');
+                    let val=[];
+                    val[0]=['A','B','C','D'];
+                    val[1]=[typ1.value,typ2.value,typ3.value,typ4.value];
+                    val[3]=[90,80,70,60]
+                    let msg='';
+                    for(let i=0;i<4;i++){
+                        if(val[1][i]!=0){
+                            msg+=val[0][i]+'&'+val[1][i]+'&'+val[3][i]+'&';
+                        }
+                    };
+                    window.location='pandon_ok.html?'+msg
+                    }"></iframe>
+            </div>
+        </form>
+    </div>
+    <script>
+
+        //js設桌號
+        var table=document.getElementById('table');
+        var selCon="<option value=''>請選擇桌號</option>";
+        var tableTol=10;//桌數
+        for(let i=1;i<=tableTol;i++){
+            selCon+="<option value='"+i+"號桌'>"+i+"號桌</option>";
+        }
+        table.innerHTML=selCon;
+        //驗證規則
+        $(document).ready(function(){
+            $("#myForm").validate({
+                subnitHandeler:function(form){
+                    form.submit();
+                },
+                rules:{//規則
+                    'entry.65282911':{
+                        required:true
+                    },
+                    'entry.1489714588':{
+                        digits:true
+                    },
+                    'entry.197815193':{
+                        digits:true
+                    },
+                    'entry.1788047780':{
+                        digits:true
+                    },
+                    'entry.1040062740':{
+                        digits:true
+                    }
+                },
+                messages:{//錯誤時顯示
+                    'entry.65282911':{
+                        required:'請輸入桌號'
+                    },
+                    'entry.1489714588':{
+                        digits:"請填入正確數量",
+                        min:"請填入正確數量"
+                    },
+                    'entry.197815193':{
+                        digits:"請填入正確數量",
+                        min:"請填入正確數量"
+                    },
+                    'entry.1788047780':{
+                        digits:"請填入正確數量",
+                        min:"請填入正確數量"
+                    },
+                    'entry.1040062740':{
+                        digits:"請填入正確數量",
+                        min:"請填入正確數量"
+                        
+                    }
+                }
+            });
+         });
+
+
+    </script>
+</body>
+</html>
