@@ -13,13 +13,8 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.1/dist/jquery.validate.min.js"></script>
     <script>
         function D(){
-            let aid=document.getElementById('typ1');
-            let bid=document.getElementById('typ2');
-            let cid=document.getElementById('typ3');
-            let did=document.getElementById('typ4');
-            let total=typ1.value+typ2.value+typ3.value+typ4.value;
-            if(total==0){
-                alert("請填入正確數量");
+            if( document.getElementById("amount").value==0){
+                alert("忘記填訂購數量了");
                 return false;
             }else{
                 var msg=false;
@@ -34,7 +29,7 @@
 <body>
     <h1 class="text-center mt-5">便當店</h1>
     <div class="container">
-        <form id="myForm" target="return" onsubmit="return D(this);" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSfhI74hx4-6eh5AsxQjUvYoZpUSKXUfLUWo_Kcc47LrB-LG3g/formResponse">
+        <form id="myForm" target="return" onsubmit="return D();" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSfhI74hx4-6eh5AsxQjUvYoZpUSKXUfLUWo_Kcc47LrB-LG3g/formResponse">
             <div class="row">
                 <!--桌號-->
                 <div class="col-sm-3">
@@ -45,34 +40,41 @@
                         </select>
                     </div>
                 </div>
+                <!--合計-->
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label>合計</label>
+                        <input type="text" id="amount" class="form-control" readonly value="0">
+                    </div>
+                </div>
             </div>
             <div class="row">
                 <!--雞腿飯-90元-->
                 <div class="col-sm-3">
                     <div class="form-group">
-                        <label for="typ1">雞腿飯-90元<span class="text-danger">(請填數量)</span></label>
-                        <input type="number" name="entry.1489714588" id="typ1" class="form-control" value="0" min=0>
+                        <label for="typ1" class="title">雞腿飯-90元<span class="text-danger">(請填數量)</span></label>
+                        <input type="number" name="entry.1489714588" id="typ1" class="form-control sum" value="0" min=0 onchange="sum()">
                     </div>
                 </div>
                 <!--雞排飯-80元-->
                 <div class="col-sm-3">
                     <div class="form-group">
-                        <label for="typ2">雞排飯-80元<span class="text-danger">(請填數量)</span></label>
-                        <input type="number" name="entry.197815193" id="typ2" class="form-control" value="0" min=0>
+                        <label for="typ2" class="title">雞排飯-80元<span class="text-danger">(請填數量)</span></label>
+                        <input type="number" name="entry.197815193" id="typ2" class="form-control sum" value="0" min=0 onchange="sum()">
                     </div>
                 </div>
                 <!--排骨飯-70元-->
                 <div class="col-sm-3">
                     <div class="form-group">
-                        <label for="typ3"">排骨飯-70元<span class="text-danger">(請填數量)</span></label>
-                        <input type="number" name="entry.1788047780" id="typ3" class="form-control" value="0" min=0>
+                        <label for="typ3" class="title">排骨飯-70元<span class="text-danger">(請填數量)</span></label>
+                        <input type="number" name="entry.1788047780" id="typ3" class="form-control sum" value="0" min=0 onchange="sum()">
                     </div>
                 </div>
                 <!--招牌飯-60元-->
                 <div class="col-sm-3">
                     <div class="form-group">
-                        <label for="typ4">招牌飯-60元<span class="text-danger">(請填數量)</span></label>
-                        <input type="number" name="entry.1040062740" id="typ4" class="form-control" value="0" min=0>
+                        <label for="typ4" class="title">招牌飯-60元<span class="text-danger">(請填數量)</span></label>
+                        <input type="number" name="entry.1040062740" id="typ4" class="form-control sum" value="0" min=0 onchange="sum()">
                     </div>
                 </div>
             </div>
@@ -89,10 +91,7 @@
                 <button type="submit" class="btn btn-primary">送出</button>
                 <!--表單返回頁-->
                 <iframe name="return" style="display: none;" onload="this.onload= function X(){
-                    let aid=document.getElementById('typ1');
-                    let bid=document.getElementById('typ2');
-                    let cid=document.getElementById('typ3');
-                    let did=document.getElementById('typ4');
+                    //傳值到ok頁
                     let val=[];
                     val[0]=['A','B','C','D'];
                     val[1]=[typ1.value,typ2.value,typ3.value,typ4.value];
@@ -159,13 +158,24 @@
                     },
                     'entry.1040062740':{
                         digits:"請填入正確數量",
-                        min:"請填入正確數量"
-                        
+                        min:"請填入正確數量" 
                     }
                 }
             });
          });
-
+         //總計
+         function sum(){
+            var amount=0;
+            for(var i=0;i<document.getElementsByClassName("sum").length;i++){
+                var sum=document.getElementsByClassName("sum")[i].value;
+                var title=document.getElementsByClassName("title")[i].innerText;
+                var titlespli=title.split("-");
+                var price=parseInt(titlespli[1]);
+                amount+=sum*price;
+            }  
+            document.getElementById("amount").value=amount;       
+         }
+         
 
     </script>
 </body>
