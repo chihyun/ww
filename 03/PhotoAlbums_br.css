@@ -1,0 +1,42 @@
+header{
+    background: url("images/index_01.gif") no-repeat;
+    float: left;
+    width: 1024px;
+    height: 338px;
+}
+
+.content{
+    background: url("images/index_02.gif") repeat-y;
+    float: left;
+    width: 1024px;
+    overflow: hidden;  
+}
+
+aside{
+    text-align: center;
+    width: 250px;
+    float: left;
+}
+
+section{
+    width: 774px;
+    float: right;
+}
+
+footer{
+    background: url("images/index_04.gif") no-repeat;
+    float: left;
+    width: 1024px;
+    height: 105px;
+}
+
+figure{
+    background: url("images/photobg.png") no-repeat;
+    height: 230px;
+    width: 280px;
+    margin-bottom: 20px;
+    margin-left: 40px;
+    padding-top: 50px;
+   text-align: center;
+    float: left;
+}
