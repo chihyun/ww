@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <script>
+        function cCor(){
+            var input=prompt('背景色:','1');
+            // var chose=document.getElementsByName('color').item(input-1).getAttribute('value');
+            var chose=document.getElementsByName('color')[input-1].getAttribute('value');
+            document.body.style.backgroundColor=chose;
+        }
+    </script>
+</head>
+<body background="">
+    <ul>
+        <li name='color' value="#ff0000">1.紅</li>
+        <li name='color' value="#00ff00">2.綠</li>
+        <li name='color' value="#0000ff">3.藍</li>
+    </ul>
+    <input type="button" onclick='cCor();' value="選背景">
+</body>
+</html>

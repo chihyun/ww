@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body onload='clock();'>
+    <div id='show'></div>
+    <input type="button" value="暫停" onclick="stop();">
+    <input type="button" value="繼續" onclick="clock();">
+    <script>
+        // function clock(){
+        //     var now=new Date();
+        //     var hr,min,sec;
+        //     hr=now.getHours();
+        //     min=now.getMinutes();
+        //     sec=now.getSeconds();
+        //     var clo=document.getElementById('show');
+        //     clo.innerHTML='現在時間 '+hr+':'+min+':'+sec
+        //     setTimeout('clock()',1000);
+
+        // }
+        
+        function pic(num){
+            var ten=parseInt(num/10);
+            var cloPic="<img src='images/"+ten+".gif'>"
+            ten=num%10;
+            cloPic+="<img src='images/"+ten+".gif'>"
+            return cloPic;
+        }
+        function clock(){
+            var now=new Date();
+            var hr,min,sec;
+            hr=pic(now.getHours());
+            min=pic(now.getMinutes());
+            sec=pic(now.getSeconds());
+            var clo=document.getElementById('show');
+            clo.innerHTML=hr+':'+min+':'+sec
+            a=setTimeout('clock()',1000);
+        }
+        function stop(){
+            clearTimeout(a);
+        }
+    </script>
+</body>
+</html>

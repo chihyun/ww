@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+    A <input type="number" id='A'>
+    B <input type="number" id='B'><br>
+    <input type="radio" name="cho" value=0>A+=B<br>
+    <input type="radio" name="cho" value=1>A-=B<br>
+    <input type="radio" name="cho" value=2>A*=B<br>
+    <input type="radio" name="cho" value=3>A/=B<br>
+    <input type="radio" name="cho" value=4>A%=B<br>
+<input type="button" value="送出" onclick="send();">
+    <script>
+    function send(){
+    var A=document.getElementById('A');
+    var Aval=A.value;
+    
+    var B=document.getElementById('B');
+    var Bval=B.value;
+    
+    var ch=document.getElementsByName("cho");
+    var c
+    for(var i=0;i<ch.length;i++){
+        if(ch[i].checked){
+            c=ch[i].value;
+             }
+    }
+    
+        switch(c){
+        case '0':
+        Aval=parseInt(Aval)+parseInt(Bval);
+            document.write(Aval);
+            console.log(Aval);
+            break;
+        case '1':
+        Aval-=Bval;
+            document.write(Aval);
+            break;
+        case '2':
+        Aval*=Bval;
+            document.write(Aval);
+            break;
+        case '3':
+        Aval/=Bval;
+            document.write(Aval);
+            break;
+        case '4':
+        Aval%=Bval;
+            document.write(Aval);
+            break;
+        default:
+        break;
+
+    }
+
+
+    }
+
+
+    
+
+
+    </script>
+</body>
+</html>
