@@ -6,3 +6,5 @@
 3. photoshop練習結果、html排版、css練習 
     * [figure排版](https://chihyun.github.io/ww/03/ps%20pratice%20web_figure.html)
     * [table排版](https://chihyun.github.io/ww/03/ps%20pratice%20web_table.html)
+4. [photoshop練習結果、html標籤](https://chihyun.github.io/ww/AP2018.html)
+5. [AJAX練習](https://chihyun.github.io/ww/XMLHttpRequest.html)
