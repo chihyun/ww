@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script>
+        var heros=[];
+        function fetchData(){
+             url="https://mdn.github.io/learning-area/javascript/oojs/json/superheroes.json";
+             var request=new XMLHttpRequest();
+             request.open('GET',url);
+             request.responseType='json';
+             request.send();
+             request.onload=function(){
+                 var s=request.response;
+                 heros=s.members;
+                 var show="<select id='slc' onchange='ch()'>";
+                 heros.forEach((mem,idx)=>{
+                     
+                     show+='<option value="'+idx+'">' +mem.name+'</option>';
+                     
+                 });
+                 show+='</select>';
+                 document.getElementById('n').innerHTML=show;
+                 console.log(document.getElementById('slc').value);
+             }
+        }
+        function ch(){
+            document.getElementById('age').innerHTML=heros[document.getElementById('slc').value].age;
+        }
+    </script>
+</head>
+<body>
+    <button onclick="fetchData()">結果</button>
+    <div id="n"></div>
+    <div id="age"></div>
+</body>
+</html>
