@@ -8,3 +8,8 @@
     * [table排版](https://chihyun.github.io/ww/03/ps%20pratice%20web_table.html)
 4. [photoshop練習結果、html標籤](https://chihyun.github.io/ww/04/AP2018.html)
 5. [AJAX練習](https://chihyun.github.io/ww/XMLHttpRequest.html)
+6. javascript練習
+    * [時鐘](https://chihyun.github.io/ww/06/clock.html)
+    * [算數](https://chihyun.github.io/ww/06/count.html)
+    * [喜歡的動物](https://chihyun.github.io/ww/06/getEleByID02.html)
+    * [換背景](https://chihyun.github.io/ww/06/getEleByN.html)
