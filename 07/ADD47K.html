@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <!-- turf -->
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@5.1.6/turf.min.js"></script>
+    <!-- boostrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"
+        integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js"
+        integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc"
+        crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #editbtn {
+            z-index: 999;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            width: 50vw;
+            height: 30px;
+            /* background-color: red; */
+            margin: 10px;
+        }
+
+        .btn {
+            background-color: whitesmoke;
+            color: black;
+            margin: 1px 3px;
+            float: right;
+        }
+
+        #table {
+            background-color: antiquewhite;
+            width: 100vw;
+            height: 40vh;
+            position: absolute;
+            z-index: 999;
+            bottom: 0;
+            right: 0;
+            display: none;
+            overflow: scroll;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 地圖 -->
+    <div id="map"></div>
+    <!-- 編輯按鈕 -->
+    <div id="editbtn">
+        <button class='btn' id="editdel" onclick="edit('editdel')" data-editdel=false>D</button>
+        <button class='btn' id="editpoint" onclick="edit('editpoint')" data-editpoint=false>·</button>
+        <button class='btn' id="editpolygon" onclick="edit('editpolygon')" data-editpolygon=false>□</button>
+        <button class='btn' id="editpolyline" onclick="edit('editpolyline')" data-editpolyline=false>/</button>
+        <!-- 匯入匯出 -->
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                file
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <li><button id="import" class="dropdown-item" type="button">import</button></li>
+                <input id="file-input" type="file" name="name" style="display: none;" />
+                <li><button id="output" class="dropdown-item" type="button">output</button></li>
+            </ul>
+        </div>
+    </div>
+    <!-- 屬性版 -->
+    <div id='table' data-edittb=false data-nowid=null>
+        <div class="row">
+            <div class="col-6">
+                <label for="name"" class=" form-label">名稱</label>
+                <input type="email" class="form-control" id="name" placeholder="XXX">
+            </div>
+            <div class="col-6">
+                <label class="form-label">分數</label>
+                <select id="score" class="form-select" aria-label="Default select example">
+                    <option selected>----</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-10">
+                <label for="descript" class="form-label">描述</label>
+                <textarea class="form-control" id="descript" rows="2"></textarea>
+            </div>
+
+        </div>
+        <br>
+        <div class="row">
+            <button class='btn' onclick="send()">送出</button>
+
+        </div>
+
+
+    </div>
+    <script>
+        //編輯類型
+        var editbtn = ['editdel', 'editpoint', 'editpolyline', 'editpolygon']
+        //屬性
+        var now = 0;//現在圖塊指標
+        var attribute = {};
+        var markers = {}
+        //初始化地圖
+        var map = L.map('map').setView([25.12467891934243, 121.450224450174161], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        //取得當前位置
+        window.navigator.geolocation
+            .getCurrentPosition(getposition);
+        function getposition(position) {
+            map.panTo([position.coords.latitude, position.coords.longitude])
+        }
+        //暫時圖層(畫面、線用)
+        var editableLayers = L.featureGroup().addTo(map);
+        var latlngs = [];//編輯時暫時儲存點的陣列
+        //地圖點擊事件
+        map.on('click', function (ev) {
+            //屬性表編輯未開啟時
+            if (!$('#table').data('edittb')) {
+                //創建點
+                if ($('#editpoint').data('editpoint')) {
+                    markers[now] = L.marker(ev.latlng).on('click', mkclk).addTo(map)//綁定點擊事件並加入地圖
+                    markers[now]._icon.id = now;//綁定ID
+                    edittable(true, now)//開啟編輯版
+                }
+                //創建多邊形
+                if ($('#editpolygon').data('editpolygon')) {
+                    L.marker(ev.latlng).addTo(editableLayers)//添加點到暫時圖層
+                    latlngs.push(ev.latlng);
+                }
+                //創建線
+                if ($('#editpolyline').data('editpolyline')) {
+                    L.marker(ev.latlng).addTo(editableLayers)//添加點到暫時圖層
+                    latlngs.push(ev.latlng);
+                }
+            }
+
+        });
+        //地圖雙擊事件(完成線面的編輯)
+        map.on('dblclick', function (e) {
+            //編輯多邊形
+            if ($('#editpolygon').data('editpolygon')) {
+                latlngs.splice(latlngs.length - 1, 1)
+                latlngs.push(latlngs[0])
+                markers[now] = L.polygon(latlngs, { color: 'red' }).on('click', mkclk2).addTo(map);//綁定點擊事件並加入地圖
+                markers[now]._path.id = now;//綁定ID
+                latlngs = []//清空暫時點陣列
+                editableLayers.clearLayers()//清空暫時圖層
+                edittable(true, now)//開啟編輯版
+            }
+            //編輯線
+            if ($('#editpolyline').data('editpolyline')) {
+                markers[now] = L.polyline(latlngs, { color: 'red' }).on('click', mkclk2).addTo(map);//綁定點擊事件並加入地圖
+                markers[now]._path.id = now;//綁定ID
+                latlngs = []//清空暫時點陣列
+                editableLayers.clearLayers()//清空暫時圖層
+                edittable(true, now)//開啟編輯版
+            }
+        })
+        //地圖右鍵事件
+        map.on('contextmenu', function (e) {
+            editbtn.forEach(element => {
+                $('#' + element).data(element, false);
+                $('#' + element).css({ 'background-color': 'whitesmoke', 'color': 'black' })
+            });
+            //在編輯模式
+            if ($('#table').data('edittb')) {
+                send()
+                edittable(false, null)//關閉編輯板
+            }
+        })
+
+        //點擊事件
+        function mkclk(e) {
+            if ($('#editdel').data('editdel')) {//刪除模式
+                delete markers[e.target._icon.id]//刪除圖形資料
+                delete attribute[e.target._icon.id]//刪除屬性資料
+                e.target.removeFrom(map)//刪除地圖上的點
+            } else {//編輯模式
+                //填充屬性
+                $('#name').val(attribute[e.target._icon.id][0])
+                $('#score').val(attribute[e.target._icon.id][1])
+                $('#descript').val(attribute[e.target._icon.id][2])
+                edittable(true, e.target._icon.id)//開啟編輯版
+            }
+        }
+        function mkclk2(e) {
+            if ($('#editdel').data('editdel')) {//刪除模式
+                delete markers[e.target._path.id]//刪除圖形資料
+                delete attribute[e.target._path.id]//刪除屬性資料
+                e.target.removeFrom(map)//刪除地圖上的點
+            } else {//編輯模式
+                //填充屬性
+                $('#name').val(attribute[e.target._path.id][0])
+                $('#score').val(attribute[e.target._path.id][1])
+                $('#descript').val(attribute[e.target._path.id][2])
+                edittable(true, e.target._path.id)//開啟編輯版
+            }
+        }
+        //選擇編輯類型
+        function edit(type) {
+            //在編輯模式
+            if ($('#table').data('edittb')) {
+                send()
+                edittable(false, null)//關閉編輯板
+            }
+            //亮顯編輯類型
+            if ($('#' + type).data(type)) {
+                editbtn.forEach(element => {
+                    $('#' + element).data(element, false);
+                    $('#' + element).css({ 'background-color': 'whitesmoke', 'color': 'black' })
+                });
+            } else {
+                editbtn.forEach(element => {
+                    if ($.inArray(element, [type])) {
+                        $('#' + element).data(element, false);
+                        $('#' + element).css({ 'background-color': 'whitesmoke', 'color': 'black' })
+                    }
+                });
+                $('#' + type).data(type, true);
+                $('#' + type).css({ 'background-color': 'black', 'color': 'whitesmoke' })
+            }
+        }
+
+        //屬性資料送出
+        function send() {
+            //紀錄屬性
+            attribute[$('#table').data('nowid')] = [$('#name').val(), $('#score').val(), $('#descript').val()]
+            edittable(false, null)//關閉編輯板
+            //下一筆
+            if ($.inArray($('#table').data('nowid'), Object.keys(attribute)) == -1) {
+                now++
+            }
+            //清空資料
+            $('#name').val('')
+            $('#score').val('----')
+            $('#descript').val('')
+        }
+
+        //開關編輯版
+        function edittable(open, id) {
+            if (open) {//開
+                $('#table').show()
+                $('#table').data('edittb', true)
+                $('#table').data('nowid', id)
+            } else {//關
+                $('#table').hide()
+                $('#table').data('edittb', false)
+                $('#table').data('nowid', null)
+            }
+        }
+
+        //匯入檔案
+        $('#import').on('click', function () {
+            $('#file-input').trigger('click');
+        });
+        $('#file-input').change(function (e) {
+            var file = e.target.files[0];
+            // 讀取文件
+            var reader = new FileReader();
+            reader.readAsText(file, 'UTF-8');
+            reader.onload = readerEvent => {
+                var content = readerEvent.target.result; // 文件內容
+                data = [];
+                content.split(/\r\n|\n/).forEach(element => {
+                    data.push(element.split('";"'))
+                });
+                data.forEach((element, idx) => {
+                    if (element.length == 4 && idx > 0) {
+                        //紀錄屬性
+                        attribute[now] = [element[0].replace('"', ''), element[1], element[2]]
+                        //生成圖形
+                        switch (element[3].substring(0, 3)) {
+                            case "POI"://點
+                                element[3] = element[3].replace('POINT(', '')
+                                element[3] = element[3].replace(')"', '')
+                                element[3] = element[3].split(' ')
+                                markers[now] = L.marker([element[3][1], element[3][0]]).on('click', mkclk).addTo(map)//綁定點擊事件並加入地圖
+                                markers[now]._icon.id = now;//綁定ID
+                                break;
+                            case "LIN"://線
+                                element[3] = element[3].replace('LINESTRING(', '')
+                                element[3] = element[3].replace(')"', '')
+                                element[3] = element[3].split(',')
+                                element[3].forEach(ele => {
+                                    ele = ele.split(' ')
+                                    latlngs.push([ele[1], ele[0]]);
+                                });
+                                markers[now] = L.polyline(latlngs, { color: 'red' }).on('click', mkclk2).addTo(map);//綁定點擊事件並加入地圖
+                                markers[now]._path.id = now;//綁定ID
+                                latlngs = []//清空暫時點陣列
+                                break;
+                            case "POL"://面
+                                element[3] = element[3].replace('POLYGON((', '')
+                                element[3] = element[3].replace('))"', '')
+                                element[3] = element[3].split(',')
+                                element[3].forEach(ele => {
+                                    ele = ele.split(' ')
+                                    latlngs.push([ele[1], ele[0]]);
+
+                                });
+                                latlngs.splice(latlngs.length - 1, 1)
+                                latlngs.push(latlngs[0])
+                                markers[now] = L.polygon(latlngs, { color: 'red' }).on('click', mkclk2).addTo(map);//綁定點擊事件並加入地圖
+                                markers[now]._path.id = now;//綁定ID
+                                latlngs = []//清空暫時點陣列
+                                break;
+                        }
+                        //下一筆
+                        now++
+                    }
+
+                });
+            }
+
+
+        });
+        //匯出檔案
+        $('#output').on('click', function () {
+            // 下載內容
+            $.each(attribute, function (idx, val) {
+                shape = ''
+                nowcoord = (markers[idx]._latlng) ? markers[idx]._latlng : markers[idx]._latlngs;
+                switch (nowcoord.length) {
+                    case 1:
+                        shape += 'POLYGON(('
+                        nowcoord[0].forEach((element, idx) => {
+                            shape += element.lng + ' ' + element.lat
+                            shape += ','
+                            if (idx == nowcoord[0].length - 1) {
+                                shape += nowcoord[0][0].lng + ' ' + nowcoord[0][0].lat
+                            }
+                        });
+                        shape += '))'
+                        break;
+                    case undefined:
+                        shape += 'POINT(' + nowcoord.lng + ' ' + nowcoord.lat + ')'
+
+                        break;
+                    default:
+                        shape += 'LINESTRING('
+                        nowcoord.forEach((element, idx) => {
+                            shape += element.lng + ' ' + element.lat
+                            if (idx != nowcoord.length - 1) {
+                                shape += ','
+                            }
+                        });
+                        shape += ')'
+                        break;
+                }
+                attribute[idx].push(shape)
+            })
+
+
+            var data = attribute;
+
+            // 下載格式整理
+            // Each column is separated by ";" and new line "\n" for next row
+            var csvContent = '"名稱";"分數";"描述";"WKT"\n"';
+            $.each(data, function (index, infoArray) {
+                dataString = infoArray.join('";"');
+
+                csvContent += dataString + '"\n';
+                if (index < Object.keys(data).length - 1) {
+                    csvContent += '"'
+                }
+            });
+
+
+            // 生成下載檔案
+            var download = function (content, fileName, mimeType) {
+                var a = document.createElement('a');
+                mimeType = mimeType || 'application/octet-stream';
+
+                if (navigator.msSaveBlob) { // IE10
+                    navigator.msSaveBlob(new Blob([content], {
+                        type: mimeType
+                    }), fileName);
+                } else if (URL && 'download' in a) { //html5 A[download]
+                    a.href = URL.createObjectURL(new Blob([content], {
+                        type: mimeType
+                    }));
+                    a.setAttribute('download', fileName);
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } else {
+                    location.href = 'data:application/octet-stream,' + encodeURIComponent(content); // only this mime type is supported
+                }
+            }
+
+            download(csvContent, 'dowload.csv', 'text/csv;encoding:utf-8');
+        });
+        //刪除
+        //addgeojson
+        // $.ajax({
+        //     url: 'http://59.125.238.140/PS_RoadCenter_SV/api/v1/case_get_EPCIrd',
+        //     type: 'POST',
+        //     data: {
+        //         dis: '八里區',
+        //         dte: '2020-12-30',
+        //         dts: '2020-01-01',
+        //         token: '$2y$10$Ls0sF9y7KOGRj/oxIhYRaOqN9A81kPjAzs.BRw3d0wh5qeVyVfPbC'
+        //     },
+        //     dataType: 'json',
+        //     success: function (data) {
+        //         console.log(data)
+        //         C = []
+        //         for (i = 0; i < data.data.length; i++) {
+        //             C.push(parseInt(data.data[i].ID))
+        //         }
+        //         console.log(C)
+        //         function pp(feature) {
+        //             if ($.inArray(feature.properties.ogr_fid, C) != -1) return true
+        //         }
+        //         $.ajax("47KT.geojson", {
+        //             dataType: "json",
+        //             success: function (response) {
+        //                 geojsonFeature = response;
+
+        //                 let B = geojsonFeature.features[0].geometry.coordinates[0];
+        //                 let A = [];
+        //                 for (i = 0; i < B[0].length; i++) {
+        //                     A.push([B[0][i][1], B[0][i][0]])
+        //                 }
+        //                 console.log(A);
+        //                 L.polygon(A, { color: 'red' }).addTo(map);
+        //                 L.geoJSON(geojsonFeature, { filter: pp }).addTo(map);
+        //             }
+        //         })
+        //     },
+        // })
+        /*************************************turf**************************************/
+        // let chkpoint = []
+        // $.ajax({
+        //     url: 'http://192.168.1.31/PS_RoadCenter_SV/api/v1/TracePercentCaseDis',
+        //     type: 'POST',
+        //     data: {
+        //         case: 0,
+        //         tm: '2020-03-25 14:06:27',
+        //         token: '$2y$10$lPUI2PeL.y2Uz6bE463pCuk9ixrtVMoS4jBfUFKTgSaNFQAE8UxK6'
+        //     },
+        //     async: false,
+        //     cache: false,
+        //     dataType: 'json',
+        //     success: function (data) {
+        //         for (i = 0; i < data.data.chkPoint.length; i++) {
+        //             var point = turf.point([parseFloat(data.data.chkPoint[i].local[1]), parseFloat(data.data.chkPoint[i].local[0])]);
+        //             var buffered = turf.buffer(point, 30, { units: 'meters' });
+        //             chkpoint.push(buffered)
+        //         }
+        //         L.geoJSON(chkpoint).addTo(map);
+
+        //     }
+        // })
+        // let trace = []
+        // $.ajax({
+        //     url: 'http://192.168.1.31/PS_RoadCenter_SV/api/v1/TraceImmAuthority',
+        //     type: 'POST',
+        //     data: {
+        //         tm: '2020-03-25 14:06:27',
+        //         token: '$2y$10$lPUI2PeL.y2Uz6bE463pCuk9ixrtVMoS4jBfUFKTgSaNFQAE8UxK6'
+        //     },
+        //     async: false,
+        //     cache: false,
+        //     dataType: 'json',
+        //     success: function (data) {
+        //         console.log(data)
+        //         for (i = 0; i < data.data.length; i++) {
+        //             if (data.data[i].rut.length != 0) {
+        //                 for (j = 0; j < data.data[i].rut.length; j++) {
+        //                     var point = turf.point([parseFloat(data.data[i].rut[j][1]), parseFloat(data.data[i].rut[j][0])]);
+        //                     trace.push(point)
+        //                 }
+        //             }
+        //         }
+        //         console.log(trace);
+        //         // L.geoJSON(trace).addTo(map);
+        //     }
+        // })
+        // console.log(trace);
+
+        // var points = turf.points([
+        //     [0, 0]
+        //     // [-46.6318, -23.5523],
+        //     // [-46.6246, -23.5325],
+        //     // [-46.6062, -23.5513],
+        //     // [-46.663, -23.554],
+        //     // [-46.643, -23.557]
+        // ]);
+
+        // var searchWithin = turf.polygon([[
+        //     [-46.653, -23.543],
+        //     [-46.634, -23.5346],
+        //     [-46.613, -23.543],
+        //     [-46.614, -23.559],
+        //     [-46.631, -23.567],
+        //     [-46.653, -23.560],
+        //     [-46.653, -23.543]
+        // ]]);
+
+        // var ptsWithin = turf.pointsWithinPolygon(points, searchWithin);
+        // console.log(ptsWithin)
+
+        // var poly = turf.polygon([[[119.32, -8.7], [119.55, -8.69], [119.51, -8.54], [119.32, -8.7]]]);
+
+        // var coords = turf.getCoords(poly);
+        // console.log(coords)
+
+    </script>
+</body>
+
+</html>
