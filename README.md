@@ -13,4 +13,4 @@
     * [算數](https://chihyun.github.io/ww/06/count.html)
     * [喜歡的動物](https://chihyun.github.io/ww/06/getEleByID02.html)
     * [換背景](https://chihyun.github.io/ww/06/getEleByN.html)
-7. [地圖編輯] （https://chihyun.github.io/ww/07/ADD47K.html)
+7. [地圖編輯](https://chihyun.github.io/ww/07/ADD47K.html)
