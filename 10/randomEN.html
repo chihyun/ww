@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <!-- <link href="./bootstrap.min.css" rel="stylesheet" type="text/css"> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="mb-3">
+        <label for="file" class="form-label">單字檔</label>
+        <input class="form-control" type="file" id="file" accept='.csv,text/plain' accept-charset="UTF-8"
+            value="words.csv">
+    </div>
+    <!-- <pre id='output'>...</pre> -->
+    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+        <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked
+            onclick="listwords()">
+        <label class="btn btn-outline-dark" for="btnradio1">list</label>
+
+        <input type="radio" class="btn-check " name="btnradio" id="btnradio2" autocomplete="off"
+            onclick="randomwords()">
+        <label class="btn btn-outline-dark" for="btnradio2">random</label>
+    </div>
+
+    <div id="word_content">
+
+    </div>
+
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="button" class="btn btn-dark" id="reresh" onclick="refrshwords()">⟳</button>
+    </div>
+
+
+
+    <!-- <script src="bootstrap.bundle.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <script>
+        // 載入csv
+        const $output = document.getElementById('output')
+        const $file = document.getElementById('file')
+        const fetchFile = async e => {
+            const [file] = e.target.files
+            const text = await file.text()
+            processData(text)
+            // $output.textContent = text
+            document.getElementById('btnradio1').click()
+        }
+
+        $file.onchange = fetchFile
+
+        var lines = [];
+        function processData(allText) {
+            var allTextLines = allText.split(/\r\n|\n/);
+            lines = []
+            for (var i = 1; i < allTextLines.length; i++) {
+                if(allTextLines[i]!=""){
+                    var data = allTextLines[i].split(',');
+                    var tarr = [];
+                    for (var j = 0; j < 2; j++) {
+                        tarr.push(data[j]);
+                    }
+                    tarr.push("")
+                    lines.push(tarr);
+                }
+            }
+        }
+
+        // 清單
+        function inner_content(lines) {
+            contents = '<ol class="list-group list-group-numbered">'
+            for (var i = 0; i < lines.length; i++) {
+                contents += '<li class="list-group-item d-flex justify-content-between align-items-start"><div class="ms-2 me-auto"><div class="fw-bold">'
+                contents += lines[i][0]
+                contents += '</div>'
+                contents += lines[i][1]
+                contents += '</div>'
+                if (lines[i][2] == "") {
+                    contents += '<span class="badge bg-dark rounded-pill">☆</span>'
+                }
+                contents += '</li>'
+            }
+            contents += '</ol>'
+            return contents
+        }
+        // 隨機5單字
+        function inner_random_content(lines) {
+            classes = []
+            for (i = 0; i < lines.length; i++) {
+                if(lines[i][2]==""){
+                    classes.push(lines[i])
+                }
+            }
+            nowdata=[]
+            contents = '<ol class="list-group list-group-numbered">'
+            for (i = 0; i < 5; i++) {
+                var randomPosition = Math.floor(Math.random() * classes.length);
+                var selected = classes.splice(randomPosition, 1);
+                nowdata.push(selected);
+            }          
+            for (i = 0; i < nowdata.length; i++) {
+                if(nowdata[i].length!=0){
+                    contents += '<li class="list-group-item d-flex justify-content-between align-items-start"><div class="ms-2 me-auto"><div class="fw-bold">'
+                    contents += nowdata[i][0][0]
+                    contents += '</div>'
+                    contents += nowdata[i][0][1]
+                    contents += '</div>'
+                    contents += '<span class="badge bg-dark rounded-pill" style="cursor:pointer" onclick="mark(\''+nowdata[i][0][0]+'\')">🗑️</span>'
+                    contents += '</li>'
+
+                }
+            }
+            
+
+            contents += '</ol>'
+            return contents
+        }
+        // 隨機1單字
+        function add1_random_content(lines,now) {
+            nowarr=Array.from(document.getElementsByClassName('fw-bold')).map(x=>x.innerText)
+
+            classes = []
+            for (i = 0; i < lines.length; i++) {
+                if(lines[i][2]=="" & nowarr.indexOf(lines[i][0])==-1){
+                    classes.push(lines[i])
+                }
+            }
+            nowdata=[]
+            contents=""
+            for (i = 0; i < 1; i++) {
+                var randomPosition = Math.floor(Math.random() * classes.length);
+                var selected = classes.splice(randomPosition, 1);
+                nowdata.push(selected);
+            }          
+            for (i = 0; i < nowdata.length; i++) {
+                if(nowdata[i].length!=0){
+                    contents += '<div class="ms-2 me-auto"><div class="fw-bold">'
+                    contents += nowdata[i][0][0]
+                    contents += '</div>'
+                    contents += nowdata[i][0][1]
+                    contents += '</div>'
+                    contents += '<span class="badge bg-dark rounded-pill" style="cursor:pointer" onclick="mark(\''+nowdata[i][0][0]+'\')">🗑️</span>'
+
+                }
+            }
+        
+            return contents
+            
+        }
+
+
+        // 列出清單
+        function listwords() {
+            var word_content = document.getElementById("word_content");
+            word_content.innerHTML = inner_content(lines)
+            document.getElementById('reresh').onclick=function() {refrshlist()}
+        }
+        function randomwords() {
+            var word_content = document.getElementById("word_content");
+            word_content.innerHTML = inner_random_content(lines)
+            document.getElementById('reresh').onclick=function() {refrshwords()}
+        }
+        function refrshlist() {
+            var word_content = document.getElementById("word_content");
+            for(i=0;i<lines.length;i++){
+                lines[i][2]=""
+            }
+            word_content.innerHTML = inner_content(lines)
+        }
+        function refrshwords() {
+            var word_content = document.getElementById("word_content");
+            word_content.innerHTML = inner_random_content(lines)
+        }
+        // 刪除隨機並移除標籤
+        function mark(now){
+            for (var i=0;i<lines.length;i++){
+                if(lines[i][0]==now){
+                    lines[i][2]="X"
+                    break;}
+            }  
+
+            newarr=add1_random_content(lines)
+            if(newarr!=""){
+                var li = document.createElement("li");
+                li.className="list-group-item d-flex justify-content-between align-items-start"
+                li.innerHTML=add1_random_content(lines)
+                document.getElementsByClassName('list-group')[0].appendChild(li)
+            }
+
+            nowarr=Array.from(document.getElementsByClassName('fw-bold')).map(x=>x.innerText)
+            remove_idx=nowarr.indexOf(now)
+            if(remove_idx!=-1){
+                console.log(remove_idx)
+                document.getElementsByClassName('list-group-item')[remove_idx].remove()
+            }
+        }
+    </script>
+</body>
+
+</html>
