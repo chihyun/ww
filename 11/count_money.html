@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>換匯定存計算機</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="input-group mb-3">
+        <span class="input-group-text">外幣利率</span>
+        <input type="text" class="form-control" id="rate">
+        <span class="input-group-text">%</span>
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text">月數</span>
+        <input type="text" class="form-control" id="month">
+        <span class="input-group-text">月</span>
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text">外幣匯率</span>
+        <input type="text" class="form-control" id="us">
+        <span class="input-group-text">元</span>
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text">數量</span>
+        <input type="text" class="form-control" id="us_chg">
+        <span class="input-group-text">個</span>
+    </div>
+
+    <div class="accordion accordion-flush" id="accordionFlushExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                    當前換算未來購買金額
+                </button>
+            </h2>
+            <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                <div class="accordion-body">
+
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="res" disabled>
+                        <button class="btn btn-outline-secondary" type="button" onclick="ukmonth()">計算</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                    台幣、外幣定存比較
+                </button>
+            </h2>
+            <div id="flush-collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                <div class="accordion-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">台幣利率</span>
+                        <input type="text" class="form-control" id="rate_twd">
+                        <span class="input-group-text">%</span>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-secondary" type="button" onclick="compare()">計算</button>
+                    </div>
+
+                    <div id="carouselExampleCaptions" class="carousel slide" style="display: none;">
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0"
+                                class="active" aria-current="true"></button>
+                            <!-- <button type="button" data-bs-target="#carouselExampleCaptions"
+                                data-bs-slide-to="1"></button> -->
+                        </div>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <div class="d-block w-100" style="height: 550px;background-color: black;">
+                                    <div class="carousel-caption" id="compare_res">
+                                    </div>
+                                </div>
+                            </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+              3
+            </button>
+          </h2>
+          <div id="flush-collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+            <div class="accordion-body">
+                RR</div>
+          </div>
+        </div> -->
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <script>
+        round10 = function (num, decimal) { return Math.round(num * 10 ** decimal) / 10 ** decimal; }
+        function ukmonth() {
+            rate = document.getElementById('rate').value
+            month = document.getElementById('month').value
+            in_us = document.getElementById('us').value
+            num = document.getElementById('us_chg').value
+            out_us = Math.round(num * (1 + (rate / 12 / 100)) ** month)
+            document.getElementById('res').value = "約等於" + month + "個月後，以" + round10(in_us * num / out_us, 2) + "購買" + out_us + "個，以"+round10(out_us*in_us/num,2)+"購買"+num+"個"
+        }
+        function compare() {
+            document.getElementById('carouselExampleCaptions').style.display='block'
+            rate_twd = document.getElementById('rate_twd').value
+            rate = document.getElementById('rate').value
+            month = document.getElementById('month').value
+            in_us = document.getElementById('us').value
+            num = document.getElementById('us_chg').value
+            out_us = Math.round(num * (1 + (rate / 12 / 100)) ** month)
+
+            in_twd = Math.round(num * in_us * (1 + (rate_twd / 12 / 100)) ** month)
+
+            document.getElementById('compare_res').innerHTML = '<h5>' + in_us + '元買進' + num +'，放置'+month+'個月</h5><p>成本' + num * in_us + '以台幣定存複利' + in_twd + '，賺' + (in_twd - num * in_us) +
+                '</p><p>定存複利後'+out_us+'，賣出</p><p>27元：' + 27 * out_us + '，賺' + (27 * out_us-num * in_us )
+                + '元</p><p>28元：' + 28*out_us+'，賺'+(28*out_us-num*in_us)
+                + '元</p><p>29元：' + 29*out_us+'，賺'+(29*out_us-num*in_us)
+                + '元</p><p>30元：' + 30*out_us+'，賺'+(30*out_us-num*in_us)
+                + '元</p><p>31元：' + 31*out_us+'，賺'+(31*out_us-num*in_us)
+                + '元</p><p>32元：' + 32*out_us+'，賺'+(32*out_us-num*in_us)
+                + '元</p><p>33元：' + 33*out_us+'，賺'+(33*out_us-num*in_us)
+                + '元</p><p>34元：' + 34*out_us+'，賺'+(34*out_us-num*in_us)
+                + '元</p><p>35元：' + 35*out_us+'，賺'+(35*out_us-num*in_us) + '元</p>'
+        }
+    </script>
+</body>
+
+</html>
