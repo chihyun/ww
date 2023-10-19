@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <link rel="stylesheet" href="https://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.Default.css">
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script src="https://leaflet.github.io/Leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    <script src="data/landscape.geojson" type="text/javascript"></script>
+    <script src="data/restaurant.geojson" type="text/javascript"></script>
+    <script src="data/hotel.geojson" type="text/javascript"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0px;
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="z-index:9999">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#functionbar"
+                aria-controls="functionbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="functionbar">
+                <div class="navbar-nav">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    <a class="nav-link" href="#" id="toasttbl">景點規劃</a>
+                    <a class="nav-link" href="#" id="toasttb2">Pricing</a>
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    <div id="map"> </div>
+
+    <div
+        style="position:absolute; bottom:2px;right:4px; z-index:9999; background-color: rgba(0, 0, 0, 0.75); border-radius: 5px;">
+        <p id="scaletextp" style="font-size:smaller; color:white; margin: 0 4px;">縮放等級：13</p>
+    </div>
+
+    <!-- 景點規劃 -->
+    <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center w-100">
+        <div id="toastNotice" class="toast hide" style="z-index:9999;position:absolute;top:60px"
+            data-bs-autohide="false" data-bs-autohide='true'>
+            <div class="toast-header">
+                <strong class="mr-auto" style="margin-right:15px">景點規劃</strong>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked
+                        value="landscape">
+                    <label class="btn btn-outline-dark" for="btnradio1">景點</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
+                        value="restaurant">
+                    <label class="btn btn-outline-dark" for="btnradio2">餐廳</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off"
+                        value="hotel">
+                    <label class="btn btn-outline-dark" for="btnradio3">旅館</label>
+                </div>
+                <button type="button" class="ml-2 mb-1 close " data-bs-dismiss="toast"
+                    style="position: absolute; right:2px;">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="toast-body">
+                <span>東部</span>
+                <div style="padding: 8px;">
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('宜蘭縣')">宜蘭縣</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('花蓮縣')">花蓮縣</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('臺東縣')">臺東縣</button>
+                </div>
+                <span>北部</span>
+                <div style="padding: 8px;">
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('基隆市')">基隆市</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('新北市')">新北市</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('桃園市')">桃園市</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('新竹市')">新竹市</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('新竹縣')">新竹縣</button>
+                </div>
+                <span>中部</span>
+                <div style="padding: 8px;">
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('苗栗縣')">苗栗縣</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('臺中市')">臺中市</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('彰化縣')">彰化縣</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('南投縣')">南投縣</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('雲林縣')">雲林縣</button>
+                </div>
+                <span>南部</span>
+                <div style="padding: 8px;">
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('嘉義市')">嘉義市</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('嘉義縣')">嘉義縣</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('臺南市')">臺南市</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('高雄市')">高雄市</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('屏東縣')">屏東縣</button>
+                </div>
+                <span>離島</span>
+                <div style="padding: 8px;">
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('連江縣')">連江縣</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('金門縣')">金門縣</button>
+                    <button type="button" class="btn btn-outline-dark"
+                        onclick="add_markerClusterGroup('澎湖縣')">澎湖縣</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- toast2 -->
+    <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center w-100">
+        <div id="toastNotice2" class="toast hide" style="z-index:9999;position:absolute;top:120px"
+            data-bs-autohide="false" data-bs-autohide='true'>
+            <div class="toast-header">
+                <strong class="mr-auto">Bootstrap</strong>
+                <small>11 mins ago</small>
+                <button type="button" class="ml-2 mb-1 close" data-bs-dismiss="toast"
+                    style="position: absolute; right:2px;">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="toast-body">
+                Hello, world! This is a toast message.
+            </div>
+        </div>
+    </div>
+
+
+    <div style="z-index:999;position:absolute;top:60px;display: block;">
+    <button type="button" class="btn btn-dark" id="toasttb3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
+            <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.598.598 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.598.598 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.598.598 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535L7.733.063z"/>
+            <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.598.598 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.659z"/>
+          </svg>
+    </button>
+    </div>
+    <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center w-100">
+        <div id="toastNotice3" class="toast hide" style="z-index:9999;position:absolute;top:120px"
+            data-bs-autohide="false" data-bs-autohide='true'>
+            <div class="toast-header">
+                <strong class="mr-auto">圖層列表</strong>
+
+                <button type="button" class="ml-2 mb-1 close" data-bs-dismiss="toast"
+                    style="position: absolute; right:2px;">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="toast-body">
+                Hello, world! This is a toast message.
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <script>
+        var map = L.map('map', { zoomControl: false }).setView([23.5, 121], 13);
+        // 底圖
+        L.tileLayer('https://a.tiles.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHVyZmpzIiwiYSI6ImNrZWp2ODRvNzFqMHoyeHJ6b3Jpc29iczQifQ.YdYb6a6rA5aCtkmDZ5wn_g', {
+            maxZoom: 19,
+            attribution: '<a href="https://www.mapbox.com/about/maps/" target="_blank" title="Mapbox">© Mapbox</a> <a href="https://www.openstreetmap.org/about/" target="_blank" title="OpenStreetMap">© OpenStreetMap</a> <a class="mapbox-improve-map" href="https://www.mapbox.com/contribute/#/-73.995/40.744/13" target="_blank" title="Improve this map">Improve this map</a>'
+        }).addTo(map);
+        // L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        //     maxZoom: 19,
+        //     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        // }).addTo(map);
+
+        // 比例尺
+        L.control.scale({ position: 'bottomright', imperial: false }).addTo(map);
+        map.on('zoomend', function (e) {
+            var y = map.getSize().y,
+                x = map.getSize().x;
+            document.getElementById('scaletextp').innerText = '縮放等級：' + e.target._zoom
+        });
+
+
+        // toast open
+        var toastElList = [].slice
+            .call(document.querySelectorAll('.toast'));
+        var toastList = toastElList.map(function (toastEl) {
+            return new bootstrap.Toast(toastEl)
+        })
+
+        document.getElementById("toasttbl")
+            .onclick = function () {
+                toastList[0].show()
+            }
+        document.getElementById("toasttb2")
+            .onclick = function () {
+                toastList[1].show()
+            }
+        document.getElementById("toasttb3")
+            .onclick = function () {
+                toastList[2].show()
+            }
+
+
+
+
+
+
+
+
+        console.log(landscape)
+        console.log(restaurant)
+        console.log(hotel)
+
+        function add_markerClusterGroup(city) {
+
+            var pointsCluster = L.markerClusterGroup();
+            // Build GeoJSON layer
+            var points = L.geoJson(window[$("#toastNotice input[name='btnradio']:checked").val()], {
+                filter: function (feature, layer) {
+                    return feature.properties.Region == city;
+                },
+                pointToLayer: function (feature, latLng) {
+                    return L.marker(latLng)
+                        .bindPopup(feature.properties.Name);
+                }
+            })
+            // Add your GeoJSON layer to the MarkerClusterGroup
+            pointsCluster.addLayer(points);
+            // Add your MarkerClusterGroup to the map
+            map.addLayer(pointsCluster);
+            map.fitBounds(pointsCluster.getBounds())
+        }
+
+
+
+
+    </script>
+</body>
+
+</html>
