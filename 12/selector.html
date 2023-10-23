@@ -170,30 +170,24 @@
         </div>
     </div>
 
-
-    <div style="z-index:999;position:absolute;top:60px;display: block;">
-    <button type="button" class="btn btn-dark" id="toasttb3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-            <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.598.598 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.598.598 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.598.598 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535L7.733.063z"/>
-            <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.598.598 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.659z"/>
-          </svg>
-    </button>
+    <div style="z-index:999;position:absolute;top:60px;display: block; left: 5px;">
+        <button type="button" class="btn btn-dark" id="toasttb3" data-option="off">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack"
+                viewBox="0 0 16 16">
+                <path
+                    d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.598.598 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.598.598 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.598.598 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535L7.733.063z" />
+                <path
+                    d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.598.598 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.659z" />
+            </svg>
+        </button>
     </div>
-    <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center w-100">
-        <div id="toastNotice3" class="toast hide" style="z-index:9999;position:absolute;top:120px"
-            data-bs-autohide="false" data-bs-autohide='true'>
-            <div class="toast-header">
-                <strong class="mr-auto">圖層列表</strong>
-
-                <button type="button" class="ml-2 mb-1 close" data-bs-dismiss="toast"
-                    style="position: absolute; right:2px;">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="toast-body">
-                Hello, world! This is a toast message.
-            </div>
-        </div>
+    <div style="z-index:999;position:absolute;top:100px;display: block; left: 5px;">
+        <button type="button" class="btn btn-dark" onclick="remove_maplyr()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+              </svg>
+        </button>
     </div>
 
 
@@ -201,6 +195,13 @@
 
 
     <script>
+        var baseMaps = {
+            // "OpenStreetMap": osm,
+            // "OpenStreetMap.HOT": osmHOT
+        };
+
+        var overlayMaps = [];
+        var lyr_control = L.control.layers(baseMaps, overlayMaps, { position: 'topleft', collapsed: false, id: 'lyr_control' })
         var map = L.map('map', { zoomControl: false }).setView([23.5, 121], 13);
         // 底圖
         L.tileLayer('https://a.tiles.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHVyZmpzIiwiYSI6ImNrZWp2ODRvNzFqMHoyeHJ6b3Jpc29iczQifQ.YdYb6a6rA5aCtkmDZ5wn_g', {
@@ -238,12 +239,21 @@
             }
         document.getElementById("toasttb3")
             .onclick = function () {
-                toastList[2].show()
+                if (Object.keys(overlayMaps).length != 0) {
+                    console.log(1)
+                    if (document.getElementById("toasttb3").dataset.option == "off") {
+                        document.getElementById("toasttb3").dataset.option = "on"
+                        document.getElementsByClassName('leaflet-control-layers-expanded')[0].style['display'] = 'block'
+                    } else {
+                        document.getElementById("toasttb3").dataset.option = "off"
+                        document.getElementsByClassName('leaflet-control-layers-expanded')[0].style['display'] = 'none'
+
+                    }
+                }
+
+
+
             }
-
-
-
-
 
 
 
@@ -252,27 +262,56 @@
         console.log(restaurant)
         console.log(hotel)
 
+
+
         function add_markerClusterGroup(city) {
 
-            var pointsCluster = L.markerClusterGroup();
-            // Build GeoJSON layer
-            var points = L.geoJson(window[$("#toastNotice input[name='btnradio']:checked").val()], {
-                filter: function (feature, layer) {
-                    return feature.properties.Region == city;
-                },
-                pointToLayer: function (feature, latLng) {
-                    return L.marker(latLng)
-                        .bindPopup(feature.properties.Name);
+            var add_lyr = true
+            map.eachLayer(function (layer) {
+                if (layer.id == $("#toastNotice input[name='btnradio']:checked").val() + city) {
+                    add_lyr = false
                 }
-            })
-            // Add your GeoJSON layer to the MarkerClusterGroup
-            pointsCluster.addLayer(points);
-            // Add your MarkerClusterGroup to the map
-            map.addLayer(pointsCluster);
-            map.fitBounds(pointsCluster.getBounds())
+            });
+
+            if (add_lyr) {
+                var pointsCluster = L.markerClusterGroup();
+                pointsCluster.id = $("#toastNotice input[name='btnradio']:checked").val() + city
+                // Build GeoJSON layer
+                var points = L.geoJson(window[$("#toastNotice input[name='btnradio']:checked").val()], {
+                    filter: function (feature, layer) {
+                        return feature.properties.Region == city;
+                    },
+                    pointToLayer: function (feature, latLng) {
+                        return L.marker(latLng)
+                            .bindPopup(feature.properties.Name);
+                    }
+                })
+                // Add your GeoJSON layer to the MarkerClusterGroup
+                pointsCluster.addLayer(points);
+                // Add your MarkerClusterGroup to the map
+                map.addLayer(pointsCluster);
+                console.log(pointsCluster._leaflet_id)
+                map.fitBounds(pointsCluster.getBounds())
+                // control layer
+                lyr_control.remove();
+                overlayMaps[$("#toastNotice input[name='btnradio']:checked").val() + city] = pointsCluster
+                lyr_control = L.control.layers(baseMaps, overlayMaps, { position: 'topleft', collapsed: false, id: 'lyr_control' })
+                lyr_control.addTo(map);
+                document.getElementsByClassName('leaflet-control-layers-expanded')[0].style['left'] = '40px'
+                document.getElementsByClassName('leaflet-control-layers-expanded')[0].style['top'] = '50px'
+            }
         }
 
+        function remove_maplyr() {
+            map.eachLayer(function (layer) {
+                if (layer.id != undefined) {
+                    overlayMaps = []
+                    lyr_control.remove();
+                    map.removeLayer(layer)
+                }
 
+            });
+        }
 
 
     </script>
